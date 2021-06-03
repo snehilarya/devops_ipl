@@ -36,28 +36,15 @@ pipeline {
             steps {
                 script {
                     if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
-                        timeout(time: 3, unit: 'MINUTES') {
-                            // you can use the commented line if u have specific user group who CAN ONLY approve
-                            //input message:'Approve deployment?', submitter: 'it-ops'
-                            input message: 'Approve deployment?'
-                        }
-                        timeout(time: 2, unit: 'MINUTES') {
-                            //
-                            
                                 // replace it with your application name or make it easily loaded from pom.xml
                                 def jarName = "ipl-dashboard-0.0.1-SNAPSHOT.jar"
                                 echo "the application is deploying ${jarName}"
                                 // NOTE : CREATE your deployemnt JOB, where it can take parameters whoch is the jar name to fetch from jenkins workspace
                                 build job: 'ApplicationToDev', parameters: [[$class: 'StringParameterValue', name: 'jarName', value: jarName]]
                                 echo 'the application is deployed !'
-                            
-
                         }
                     }
                 }
             }
         }
-        
-            
-        }
-    }
+}
