@@ -27,6 +27,7 @@ pipeline {
                         def pom = readMavenPom file: 'pom.xml'
                         print pom.version
                         archive 'target*//*.jar'
+                        sh 'ls'
                     }
                 }
 
@@ -36,8 +37,8 @@ pipeline {
             steps {
                 script {
                     if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
-                              sh 'cd target'
-                              sh 'java -jar ipl-dashboard-0.0.1-SNAPSHOT.jar'
+                        sh 'ls'
+                              sh 'cd target; java -jar ipl-dashboard-0.0.1-SNAPSHOT.jar'
                         }
                     }
                 }
