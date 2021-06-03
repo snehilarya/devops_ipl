@@ -38,7 +38,8 @@ pipeline {
                 script {
                     if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
                         sh 'ls'
-                              sh 'cd target; java -jar ipl-dashboard-0.0.1-SNAPSHOT.jar'
+                             sh 'kill -9 $(lsof -t -i:8082) || echo "Process was not running."'
+                             sh 'echo "mvn spring-boot:run" | at now + 1 minutes'
                         }
                     }
                 }
