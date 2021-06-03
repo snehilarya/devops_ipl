@@ -17,13 +17,9 @@ pipeline {
                     echo 'Pulling...' + env.BRANCH_NAME
                     def mvnHome = tool 'Jenkins-maven'
                     if (isUnix()) {
-                        def targetVersion = getDevVersion()
-                        print 'target build version...'
-                        print targetVersion
-                        sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true -Dbuild.number=${targetVersion} clean package"
+                        sh "'${mvnHome}/bin/mvn' -Dintegration-tests.skip=true clean package"
                         def pom = readMavenPom file: 'pom.xml'
                         // get the current development version
-                        developmentArtifactVersion = "${pom.version}-${targetVersion}"
                         print pom.version
                         archive 'target*//*.jar'
                     } else {
