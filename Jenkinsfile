@@ -44,7 +44,34 @@ pipeline {
                     }
                 }
             }
+        stage('Sonar scan execution') {
+            // Run the sonar scan
+            steps {
+                script {
+                    def mvnHome = tool 'Maven-jenkins'
+                    withSonarQubeEnv {
+                        sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dsonar.host.url=localhost:9000 -Dsonar.login=a4bd62babbfcc38fe53550288289e49cc50ced87 -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
+                    }
+                }
+            }
         }
+        // mvn sonar:sonar -Dsonar.host.url=localhost:9000 -Dsonar.login=a4bd62babbfcc38fe53550288289e49cc50ced87
+        // waiting for sonar results based into the configured web hook in Sonar server which push the status back to jenkins
+        // stage('Sonar scan result check') {
+        //     steps {
+        //         timeout(time: 2, unit: 'MINUTES') {
+        //             retry(3) {
+        //                 script {
+        //                     def qg = waitForQualityGate()
+        //                     if (qg.status != 'OK') {
+        //                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+    }
 
 // The options directive is for configuration that applies to the whole job.
     options {
