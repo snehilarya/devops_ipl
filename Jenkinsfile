@@ -48,7 +48,7 @@ pipeline {
             // Run the sonar scan
             steps {
                 script {
-                    def mvnHome = tool 'Maven-jenkins'
+                    def mvnHome = tool 'Jenkins-maven'
                     withSonarQubeEnv {
                         sh "'${mvnHome}/bin/mvn'  verify sonar:sonar -Dsonar.host.url=localhost:9000 -Dsonar.login=a4bd62babbfcc38fe53550288289e49cc50ced87 -Dintegration-tests.skip=true -Dmaven.test.failure.ignore=true"
                     }
