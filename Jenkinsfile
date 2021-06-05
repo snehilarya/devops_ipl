@@ -3,7 +3,7 @@ pipeline {
     agent any
     // global env variables
     environment {
-        EMAIL_RECIPIENTS = 'snehilarya2@gmail.com'
+        EMAIL_RECIPIENTS = 'snehilarya1@gmail.com'
     }
     stages {
 
@@ -55,22 +55,19 @@ pipeline {
                 }
             }
         }
-        // mvn sonar:sonar -Dsonar.host.url=localhost:9000 -Dsonar.login=a4bd62babbfcc38fe53550288289e49cc50ced87
-        // waiting for sonar results based into the configured web hook in Sonar server which push the status back to jenkins
-        // stage('Sonar scan result check') {
-        //     steps {
-        //         timeout(time: 2, unit: 'MINUTES') {
-        //             retry(3) {
-        //                 script {
-        //                     def qg = waitForQualityGate()
-        //                     if (qg.status != 'OK') {
-        //                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+
+    }
+    post {
+        // Always runs. And it runs before any of the other post conditions.
+        success {
+            sendEmail("Successful");
+        }
+        unstable {
+            sendEmail("Unstable");
+        }
+        failure {
+            sendEmail("Failed");
+        }
     }
 
 // The options directive is for configuration that applies to the whole job.
@@ -83,4 +80,35 @@ pipeline {
         // let's time it out after an hour.
         timeout(time: 25, unit: 'MINUTES')
     }
+}
+def developmentArtifactVersion = ''
+def releasedVersion = ''
+// get change log to be send over the mail
+@NonCPS
+def getChangeString() {
+    MAX_MSG_LEN = 100
+    def changeString = ""
+
+    echo "Gathering SCM changes"
+    def changeLogSets = currentBuild.changeSets
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            truncated_msg = entry.msg.take(MAX_MSG_LEN)
+            changeString += " - ${truncated_msg} [${entry.author}]\n"
+        }
+    }
+
+    if (!changeString) {
+        changeString = " - No new changes"
+    }
+    return changeString
+}
+
+def sendEmail(status) {
+    mail(
+            to: "$EMAIL_RECIPIENTS",
+            subject: "Build $BUILD_NUMBER - " + status + " (${currentBuild.fullDisplayName})",
+            body: "Changes:\n " + getChangeString() + "\n\n Check console output at: $BUILD_URL/console" + "\n")
 }
