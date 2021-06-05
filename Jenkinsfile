@@ -33,17 +33,7 @@ pipeline {
 
             }
         }
-        stage('Development deploy') {
-            steps {
-                script {
-                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
-                        sh 'ls'
-                             sh 'kill -9 $(lsof -t -i:8082) || echo "Process was not running."'
-                             sh 'echo "mvn spring-boot:run" | at now + 1 minutes'
-                        }
-                    }
-                }
-            }
+        
         stage('Sonar scan execution') {
             // Run the sonar scan
             steps {
@@ -55,7 +45,31 @@ pipeline {
                 }
             }
         }
-
+        stage('Sonar scan result check') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    retry(3) {
+                        script {
+                            def qg = waitForQualityGate()
+                            if (qg.status != 'OK') {
+                                error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Development deploy') {
+            steps {
+                script {
+                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
+                        sh 'ls'
+                             sh 'kill -9 $(lsof -t -i:8082) || echo "Process was not running."'
+                             sh 'echo "mvn spring-boot:run" | at now + 1 minutes'
+                        }
+                    }
+                }
+            }
     }
     post {
         // Always runs. And it runs before any of the other post conditions.
