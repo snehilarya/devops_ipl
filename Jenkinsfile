@@ -7,7 +7,7 @@ pipeline {
     }
     stages {
 
-        stage('Build with unit testing') {
+        stage('Build') {
             steps {
                 // Run the maven build
                 script {
@@ -33,7 +33,7 @@ pipeline {
 
             }
         }
-        stage('Development deploy approval and deployment') {
+        stage('Development deploy') {
             steps {
                 script {
                     if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
